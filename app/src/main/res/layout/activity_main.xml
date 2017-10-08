@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.admin.weekend6assigment.MainActivity">
+
+    <Button
+        android:onClick="getPhoto"
+        android:text="Take a Photo and post on Facebook"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <com.twitter.sdk.android.core.identity.TwitterLoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:onClick="TweetonTwitter"
+        android:text="Tweet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:onClick="TestLeak"
+        android:text="Tesasdasas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>
