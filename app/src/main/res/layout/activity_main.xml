@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent"
+
+    xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_height="match_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,9 +27,64 @@
         android:layout_height="wrap_content" />
 
     <Button
-        android:onClick="TestLeak"
-        android:text="Tesasdasas"
+        android:onClick="logTimber"
+        android:text="Log with Timber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/txtScanContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/txtScanFormat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:onClick="scanbarcode"
+        android:text="Scan Bar Code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:onClick="MemoryLeak"
+        android:text="Crash the App by Memory Leak"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:textSize="25sp"
+        android:gravity="center"
+        android:text="Vector Image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:src="@drawable/vector_img"
+        android:layout_gravity="center"
+        android:layout_width="250dp"
+        android:layout_height="250dp" />
+    <Button
+        android:text="StateListDrawable Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/close"
+        android:background="@drawable/button">
+    </Button>
+    <EditText
+        android:id="@+id/txtNoteTitle"
+        android:hint="Note Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <EditText
+        android:id="@+id/txtNoteMessage"
+        android:hint="Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:onClick="SaveToDB"
+        android:text="Save to Database(SUGAR)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
 </LinearLayout>
+</ScrollView>

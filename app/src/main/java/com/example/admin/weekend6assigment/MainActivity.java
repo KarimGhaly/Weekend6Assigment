@@ -3,14 +3,20 @@ package com.example.admin.weekend6assigment;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.admin.weekend6assigment.JungleProblem.Jungle;
 import com.example.admin.weekend6assigment.db.DaoMaster;
 import com.example.admin.weekend6assigment.db.DaoSession;
 import com.example.admin.weekend6assigment.db.User;
@@ -22,6 +28,9 @@ import com.facebook.share.Sharer;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.orm.SugarContext;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.DefaultLogger;
 import com.twitter.sdk.android.core.Result;
@@ -33,9 +42,11 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.twitter.sdk.android.tweetcomposer.ComposerActivity;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivityTAG";
@@ -46,12 +57,15 @@ public class MainActivity extends AppCompatActivity {
     ShareDialog shareDialog;
     TwitterLoginButton loginButton;
     private DaoSession daoSession;
+    TextView txtScanContent;
+    TextView txtScanFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         IntiliazeTwitter();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SugarContext.init(this);
         setupFacebook();
         setupTwitter();
         String EncodedMessage = EncodeString("Errors in strategy cannot be correct through tactical maneuvers");
@@ -61,6 +75,10 @@ public class MainActivity extends AppCompatActivity {
         daoSession = ((AppController) getApplication()).getDaoSession();
         AddUsertoDB();
         ShowUsersFromDB();
+        setupTimper();
+        txtScanContent = (TextView) findViewById(R.id.txtScanContent);
+        txtScanFormat = (TextView) findViewById(R.id.txtScanFormat);
+        Jungle jungle = new Jungle();
     }
 
     public void setupFacebook(){
@@ -81,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Please make sure you have installed Facebook app First", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onError: "+error.toString());
             }
         });
@@ -145,20 +164,34 @@ public class MainActivity extends AppCompatActivity {
         return charCountMap.toString();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_main);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
             flagImgCaptured = true;
             ShareonFB();
         }
+
         else
         {
-            callbackManager.onActivityResult(requestCode, resultCode, data);
-            loginButton.onActivityResult(requestCode, resultCode, data);
-           // Toast.makeText(this, "Image Failed", Toast.LENGTH_SHORT).show();
+            IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (intentResult != null && intentResult.getContents() != null)
+            {
+                txtScanContent.setText(intentResult.getContents());
+                txtScanFormat.setText(intentResult.getFormatName());
+            }
+            else {
+                callbackManager.onActivityResult(requestCode, resultCode, data);
+                loginButton.onActivityResult(requestCode, resultCode, data);
+            }
         }
 
     }
@@ -169,9 +202,11 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
+
     public void TweetonTwitter(View view) {
         Tweet();
     }
+
     public void ShareonFB(){
         SharePhoto sharePhoto1 = new SharePhoto.Builder().setBitmap(imageBitmap).build();
         SharePhotoContent content = new SharePhotoContent.Builder()
@@ -179,15 +214,26 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
     }
+
     public void Tweet(){
         final TwitterSession session = TwitterCore.getInstance().getSessionManager()
                 .getActiveSession();
-        final Intent intent = new ComposerActivity.Builder(MainActivity.this)
-                .session(session)
-                .text("")
-                .hashtags("")
-                .createIntent();
-        startActivity(intent);
+        if(session != null) {
+            final Intent intent = new ComposerActivity.Builder(MainActivity.this)
+                    .session(session)
+                    .text("")
+                    .hashtags("")
+                    .createIntent();
+            startActivity(intent);
+        }
+        else
+        {
+            Toast.makeText(this, "You must Sign in First", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void setupTimper(){
+        Timber.plant(new Timber.DebugTree());
     }
 
     public void AddUsertoDB(){
@@ -197,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
         user.setEmail("krmkarm@yahoo.com");
         daoSession.insert(user);
     }
+
     public void ShowUsersFromDB(){
       UserDao userDao =  daoSession.getUserDao();
         List<User> users = userDao.loadAll();
@@ -206,4 +253,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void logTimber(View view) {
+        Timber.d("Loged With Timber");
+    }
+
+    public void startCamera() {
+        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+        intentIntegrator.setOrientationLocked(false);
+        intentIntegrator.setBeepEnabled(true);
+        intentIntegrator.setBarcodeImageEnabled(true);
+        intentIntegrator.initiateScan();
+    }
+
+    public void scanbarcode(View view) {
+        startCamera();
+    }
+
+    public void createMemoryLeak(){
+        new MyThread().start();
+
+    }
+
+    public void MemoryLeak(View view) {
+        createMemoryLeak();
+
+    }
+
+    public void SaveToDB(View view) {
+        EditText txtNoteTitle = (EditText) findViewById(R.id.txtNoteTitle);
+        EditText txtNoteMessage = (EditText) findViewById(R.id.txtNoteMessage);
+        Note note = new Note(txtNoteTitle.getText().toString(),txtNoteMessage.getText().toString());
+        note.save();
+        List<Note> noteList = new ArrayList<>();
+        noteList = Note.listAll(Note.class);
+        for(Note n: noteList)
+        {
+            Log.d(TAG, "SaveToDBXY: "+n.getTitle()+"   "+n.getNote());
+        }
+    }
+
+
+    private class MyThread extends Thread {
+        @Override
+        public void run() {
+            while (true) {
+                SystemClock.sleep(1000);
+            }
+        }
+    }
 }

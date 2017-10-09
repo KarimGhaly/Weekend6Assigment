@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.example.admin.weekend6assigment.db.DaoMaster;
 import com.example.admin.weekend6assigment.db.DaoSession;
+import com.orm.SugarContext;
 import com.squareup.leakcanary.LeakCanary;
 
 import org.greenrobot.greendao.database.Database;
@@ -32,4 +33,9 @@ public class AppController extends Application {
         return daoSession;
     }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        SugarContext.terminate();
+    }
 }
